@@ -1,0 +1,22 @@
+{
+  "name": "arctic-agents",
+  "version": "1.0.0",
+  "description": "Proof-of-concept workflow for Arctic agent logic, interpreter routing, and external API integrations.",
+  "main": "dist/demo.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/demo.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.23.0",
+    "node-fetch": "^3.3.2",
+    "ws": "^8.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/ws": "^8.5.10",
+    "typescript": "^5.4.0"
+  },
+  "license": "MIT"
+}
