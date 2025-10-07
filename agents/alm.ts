@@ -10,7 +10,7 @@ const anthropic = new Anthropic({
   apiKey: process.env.CLAUDE_KEY
 });
 
-export async function runSLM(
+export async function runALM(
   agent: AgentID,
   userText: string,
   context: string
