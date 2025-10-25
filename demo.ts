@@ -31,7 +31,7 @@ async function runDemo() {
   const generalReply = await interpreter.handle(
     "so what do you think about the market"
   );
-  console.log("\n[General SLM Reply]\n" + generalReply);
+  console.log("\n[General ALM Reply]\n" + generalReply);
 
   console.log("\n=== Demo Complete ===");
 }
