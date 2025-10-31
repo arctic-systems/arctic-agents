@@ -1,0 +1,9 @@
+torch>=2.4.0
+transformers>=4.45.0
+datasets>=3.0.0
+accelerate>=0.45.0
+peft>=0.13.0
+bitsandbytes>=0.44.0
+numpy>=1.26.0
+tqdm>=4.66.0
+flash-attn>=2.6.0
