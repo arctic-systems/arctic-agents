@@ -1,6 +1,7 @@
 import http from "http";
 import { readJson, sendJson, clamp } from "./utils.js";
 import { insertLesson, listLessons } from "./store.js";
+import { runInference } from "./inference.js";
 
 const port = Number(process.env.PORT || 8080);
 
@@ -25,6 +26,20 @@ const server = http.createServer(async (req, res) => {
       }
       const lesson = insertLesson(body);
       return sendJson(res, 200, { ok: true, id: lesson.id });
+    }
+
+    if (req.url === "/inference") {
+      if (req.method !== "POST") return sendJson(res, 405, { error: "use POST" });
+      const body = await readJson(req);
+      const question = clamp(body?.question, 500);
+      if (!question) return sendJson(res, 400, { error: "missing question" });
+
+      const lessons = Array.isArray(body?.lessons)
+        ? body.lessons.slice(0, 18)
+        : listLessons(18);
+
+      const result = await runInference({ question, lessons });
+      return sendJson(res, 200, result);
     }
 
     return sendJson(res, 404, { error: "not found" });
