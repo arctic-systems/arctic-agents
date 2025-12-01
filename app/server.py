@@ -1,28 +1,16 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
-from typing import List, Optional
-
 from .inference import generate, load_model
+from .schemas import ChatRequest, ChatResponse
 
 app = FastAPI(title="Bloomed Terminal", version="0.1.0")
-
-class Message(BaseModel):
-    role: str  # "system" | "user" | "assistant"
-    content: str
-
-class ChatRequest(BaseModel):
-    messages: List[Message]
-    max_new_tokens: Optional[int] = None
-    temperature: Optional[float] = None
-    top_p: Optional[float] = None
-    stop: Optional[List[str]] = None
-
-class ChatResponse(BaseModel):
-    content: str
 
 @app.on_event("startup")
 def warmup():
     load_model()
+
+@app.get("/health")
+def health():
+    return {"ok": True}
 
 @app.post("/v1/chat", response_model=ChatResponse)
 def chat(req: ChatRequest):
