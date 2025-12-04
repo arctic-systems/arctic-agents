@@ -3,15 +3,18 @@
  * - receive user input
  * - classify simple intent
  * - fetch external data when required
+ * - optionally route complex tasks to Swarms
  * - synthesize context
- * - generate a final reply via the ALM wrapper
- *
- * This file is intentionally generic and does not include UI logic.
+ * - generate final reply via ALM wrapper
  */
 
 import { runALM } from "../agents/alm.js";
 import { fetchTokenSnapshot } from "../integrations/birdeye.js";
 import { checkTikTok } from "../integrations/tiktok.js";
+import { AGENTS } from "../agents/registry.js";
+
+import { spawn } from "child_process";
+import path from "path";
 
 export class ArcticInterpreter {
   private agentId: any;
@@ -44,11 +47,65 @@ export class ArcticInterpreter {
     );
   }
 
+  // -------------------------------
+  // Swarms bridge (Node → Python)
+  // -------------------------------
+  private async runSwarms(task: string, strategy = "sequential") {
+    return new Promise((resolve) => {
+      const script = path.join(
+        __dirname,
+        "../integrations/swarms/run_swarms.py"
+      );
+
+      // Transform Arctic registry into JSON to pass to Python
+      const registryPayload = JSON.stringify(
+        Object.values(AGENTS).map((a) => ({
+          id: a.id,
+          label: a.label,
+          systemPrompt: a.systemPrompt
+        }))
+      );
+
+      const proc = spawn("python", [script, task, strategy, registryPayload]);
+
+      let result = "";
+      let err = "";
+
+      proc.stdout.on("data", (d) => (result += d.toString()));
+      proc.stderr.on("data", (e) => (err += e.toString()));
+
+      proc.on("close", () => {
+        if (err.length > 0) console.error("SWARMS ERROR:", err);
+
+        try {
+          resolve(JSON.parse(result));
+        } catch {
+          resolve(result);
+        }
+      });
+    });
+  }
+
+  private isMultiStepIntent(input: string): boolean {
+    const lower = input.toLowerCase();
+    return (
+      /research|analyze|deep dive|long report|multi step|multi-step|break down/.test(
+        lower
+      ) ||
+      lower.length > 300
+    );
+  }
+
+  // --------------------------------------------------
+  //                MAIN ENTRYPOINT
+  // --------------------------------------------------
   async handle(userInput: string): Promise<string> {
     this.record("user", userInput);
     const lower = userInput.toLowerCase();
 
-    // Meme summary intent
+    // --------------------------------------------
+    // 1. Meme summary intent
+    // --------------------------------------------
     if (/tell me about|info on|details on|explain this/.test(lower)) {
       const address = this.extractContractAddress(userInput);
       if (!address) return this.generate("No address detected.");
@@ -66,7 +123,9 @@ export class ArcticInterpreter {
       return this.generate(summary);
     }
 
-    // TikTok trending intent
+    // --------------------------------------------
+    // 2. TikTok trending intent
+    // --------------------------------------------
     if (/tiktok|trending/.test(lower)) {
       if (!this.lastTokenTitle) {
         return this.generate("A token summary must be requested first.");
@@ -83,12 +142,23 @@ export class ArcticInterpreter {
       return this.generate(report);
     }
 
-    // Default fallback: ALM handles the message
-    return this.generate(
-      "General user message routed through ALM pipeline."
-    );
+    // --------------------------------------------
+    // 3. Multi-step / research → SWARMS PIPELINE
+    // --------------------------------------------
+    if (this.isMultiStepIntent(userInput)) {
+      const swarmOut: any = await this.runSwarms(userInput, "sequential");
+      return this.generate(JSON.stringify(swarmOut, null, 2));
+    }
+
+    // --------------------------------------------
+    // 4. Fallback → ALM
+    // --------------------------------------------
+    return this.generate("General user message routed through ALM pipeline.");
   }
 
+  // --------------------------------------------------
+  //           ALM WRAPPER CONNECTION
+  // --------------------------------------------------
   private async generate(summary: string): Promise<string> {
     const output = await runALM(
       this.agentId,
