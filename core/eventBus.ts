@@ -6,7 +6,7 @@
 type EventHandler<T> = (payload: T) => void;
 
 interface EventMap {
-  "slm:reply": { agent: string; text: string };
+  "alm:reply": { agent: string; text: string };
   "token:buy": { mint: string; amount: number };
   "token:sell": { mint: string; amount: number };
   "integration:error": { source: string; message: string };
