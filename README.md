@@ -3,11 +3,11 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey.svg)](./LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=shields)](http://makeapullrequest.com)
 
-A compact text-generation service with a consistent house style and an automated publishing loop. Bloomed Terminal runs a lightweight local model behind a clean HTTP API and delivers fresh entries to Firebase Realtime Database every hour via a secured scheduler.
-
 <p align="center">
   <img src="assets/bloomed.png" alt="Bloomed Terminal" width="960">
 </p>
+
+A compact text-generation service with a consistent house style and an automated publishing loop. Bloomed Terminal runs a lightweight local model behind a clean HTTP API and delivers fresh entries to Firebase Realtime Database every hour via a secured scheduler.
 
 ---
 
