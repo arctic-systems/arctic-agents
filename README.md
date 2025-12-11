@@ -1,5 +1,3 @@
-# Bloomed Terminal
-
 [![Made with Python](https://img.shields.io/badge/made%20with-Python-3776AB.svg)](https://www.python.org/)
 [![CI](https://github.com/dev-nightshift/bloomed-terminal/actions/workflows/hourly_backrooms.yml/badge.svg)](https://github.com/dev-nightshift/bloomed-terminal/actions/workflows/hourly_backrooms.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey.svg)](./LICENSE)
