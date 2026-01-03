@@ -1,0 +1,11 @@
+.PHONY: run
+run:
+	uvicorn app.main:app --reload --port 8080
+
+.PHONY: docker-build
+docker-build:
+	docker build -t claude-companions-backend:local .
+
+.PHONY: docker-run
+docker-run:
+	docker run --rm -p 8080:8080 --env-file .env claude-companions-backend:local
